@@ -1,0 +1,12 @@
+tb_core.sv
+*.*~
+.restartSimSession.tcl.old
+.synopsys_dve_rebuild.tcl
+DVEfiles/
+csrc/
+inter.vpd
+simulation_results.txt
+simv
+simv.daidir/
+ucli.key
+
