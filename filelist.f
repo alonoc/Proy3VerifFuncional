@@ -1,5 +1,7 @@
 +define+S50 
 +define+VERBOSE 
++define+SDR_32BIT
++define+SDR_08COL_BITS
 +incdir+../../rtl/core
 +incdir+../tb/
 ../tb/tb_top.sv
