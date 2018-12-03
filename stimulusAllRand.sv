@@ -21,7 +21,7 @@ class stimulusAllRand extends stimulusRandAddr;
     }
 
     constraint memoryRange {
-        foreach(bank[i]) { bank[i] inside {[0:4]} };
+        foreach(bank[i]) { bank[i] inside {[0:3]} };
         foreach(row[i]) { row[i] inside {[0:11]} };
         foreach(col[i]) { col[i] inside {[0:7]} };
     };
