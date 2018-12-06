@@ -73,20 +73,62 @@ class covergroups_sdram_ctrl;
 		
 		addr	: coverpoint sdram_ctrl_intf.sdr_addr;
 		
-// `ifdef SDR_08COL_BITS
-		// column	:	coverpoint sdram_ctrl_intf.sdr_addr[7:0];
-// `elsif SDR_09COL_BITS
-		// column	:	coverpoint sdram_ctrl_intf.sdr_addr[8:0];
-// `elsif SDR_10COL_BITS
-		// column	:	coverpoint sdram_ctrl_intf.sdr_addr[9:0];
-// `else
-		// column	:	coverpoint sdram_ctrl_intf.sdr_addr[10:0];
-// `endif
-		
-		// row		: 	coverpoint sdram_ctrl_intf.sdr_addr[11:0];
-		
 		read_write_x_bank :	cross cmd, bank
 		{
+			ignore_bins my_ignore = binsof(cmd) intersect 
+			{
+				4'b1xxx,
+				4'b0111,
+				4'b0011,
+				4'b0110,
+				4'b0010,
+				4'b0001,
+				4'b0000
+			};
+		}
+		
+		read_write_x_addr : cross cmd, addr
+		{
+`ifdef SDR_08COL_BITS
+			bins allowed_addrs 				= binsof(addr) intersect {[0:255]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[256:$]};
+`elsif SDR_09COL_BITS
+			bins allowed_addrs 				= binsof(addr) intersect {[0:511]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[512:$]};
+`elsif SDR_10COL_BITS
+			bins allowed_addrs 				= binsof(addr) intersect {[0:1023]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[1024:$]};
+`else
+			bins allowed_addrs 				= binsof(addr) intersect {[0:2047]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[2048:$]};
+`endif
+			ignore_bins my_ignore = binsof(cmd) intersect 
+			{
+				4'b1xxx,
+				4'b0111,
+				4'b0011,
+				4'b0110,
+				4'b0010,
+				4'b0001,
+				4'b0000
+			};
+		}
+		
+		read_write_x_bank_x_addr : cross cmd, bank, addr
+		{
+`ifdef SDR_08COL_BITS
+			bins allowed_addrs 				= binsof(addr) intersect {[0:255]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[256:$]};
+`elsif SDR_09COL_BITS
+			bins allowed_addrs 				= binsof(addr) intersect {[0:511]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[512:$]};
+`elsif SDR_10COL_BITS
+			bins allowed_addrs 				= binsof(addr) intersect {[0:1023]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[1024:$]};
+`else
+			bins allowed_addrs 				= binsof(addr) intersect {[0:2047]};
+			bins incorrect_addrs 			= binsof(addr) intersect {[2048:$]};
+`endif
 			ignore_bins my_ignore = binsof(cmd) intersect 
 			{
 				4'b1xxx,
@@ -139,35 +181,23 @@ class covergroups_sdram_ctrl;
 				4'b0100, // WRITE
 				4'b0110, // BURST TERMINATE
 				4'b0010, // RECHARGE
-				4'b0001, // AUTOREFRES
+				4'b0001, // AUTOREFRESH
 				4'b0000  // LOAD MODE REGISTER
 			};
 		}
 		
-		read_write_x_bank_x_addr : cross cmd, bank, addr
+		close_banks : cross cmd, bank
 		{
-`ifdef SDR_08COL_BITS
-			bins allowed_addrs 				= binsof(addr) intersect {[0:255]};
-			bins incorrect_addrs 			= binsof(addr) intersect {[256:$]};
-`elsif SDR_09COL_BITS
-			bins allowed_addrs 				= binsof(addr) intersect {[0:511]};
-			bins incorrect_addrs 			= binsof(addr) intersect {[512:$]};
-`elsif SDR_10COL_BITS
-			bins allowed_addrs 				= binsof(addr) intersect {[0:1023]};
-			bins incorrect_addrs 			= binsof(addr) intersect {[1024:$]};
-`else
-			bins allowed_addrs 				= binsof(addr) intersect {[0:2047]};
-			bins incorrect_addrs 			= binsof(addr) intersect {[2048:$]};
-`endif
-			ignore_bins my_ignore = binsof(cmd) intersect 
+			ignore_bins my_ignore = binsof(cmd) intersect
 			{
-				4'b1xxx,
-				4'b0111,
-				4'b0011,
-				4'b0110,
-				4'b0010,
-				4'b0001,
-				4'b0000
+				4'b1xxx, // INHIBIT
+				4'b0111, // NOP
+				4'b0011, // ACTIVE
+				4'b0101, // READ
+				4'b0100, // WRITE
+				4'b0110, // BURST TERMINATE
+				4'b0001, // AUTOREFRESH
+				4'b0000  // LOAD MODE REGISTER
 			};
 		}
 		
