@@ -42,7 +42,16 @@ wire #(2.0) sdram_clk_d   = sdram_clk;
     sdrc_top #(.SDR_DW(8),.SDR_BW(1))  u_dut(
         .cfg_sdr_width      (2'b10                  ),  // 8 BIT SDRAM
 `endif
-        .cfg_colbits        (2'b00                  ),  // 8 Bit Column Address
+
+`ifdef SDR_08COL_BITS
+        .cfg_colbits        (2'b00                  ),  // 08 Bit Column Address
+`elsif SDR_09COL_BITS
+        .cfg_colbits        (2'b01                  ),  // 09 Bit Column Address
+`elsif SDR_10COL_BITS
+        .cfg_colbits        (2'b10                  ),  // 10 Bit Column Address
+`else
+        .cfg_colbits        (2'b11                  ),  // 11 Bit Column Address
+`endif
         
         // Wishbone
         .wb_rst_i           (!SdrcIntf.wb_rst_i     ),
@@ -138,6 +147,9 @@ whitebox_intf wbox_intf
 		.sdram_dq			(sdrc_top.sdr_dq),
 		//SDRAMS parameters
 		.sdram_cas 			(sdrc_top.cfg_sdr_cas),
+        .sdram_trcar_d      (sdrc_top.cfg_sdr_trcar_d),
+        .sdram_rfsh         (sdrc_top.cfg_sdr_rfsh  ),
+        .sdram_rfmax        (sdrc_top.cfg_sdr_rfmax ),
 		// WISHBONE signals
 		.wb_clk_i			(sdrc_top.wb_clk_i		),
 		.wb_rst_i			(sdrc_top.wb_rst_i		),
@@ -155,9 +167,9 @@ whitebox_intf wbox_intf
 assertions assert_module(wbox_intf);
 
 initial begin
-	$display("-------------------------------------- ");
-  	$display("          Simulation: Started          ");
-  	$display("-------------------------------------- ");
+    $display("-------------------------------------- ");
+      $display("          Simulation: Started          ");
+      $display("-------------------------------------- ");
 end
 
 test t1(SdrcIntf);
