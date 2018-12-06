@@ -65,12 +65,12 @@ property prop_wb_std_acknowledge;
 endproperty
 
 property prop_sdram_cas_wait;
-    @(posedge wbox_intf.sdram_clk) read_cmd ##[2:3] wbox_intf.sdram_cas |-> !$isunknown(wbox_intf.sdram_dq);
+    @(posedge wbox_intf.sdram_clk) read_cmd ##[2:3] !$isunknown(wbox_intf.sdram_dq);
 endproperty
 
-property prop_sdram_cas_valid;
-    @(posedge wbox_intf.sdram_clk) wbox_intf.sdram_cas == 3'b010 or wbox_intf.sdram_cas == 3'b011;
-endproperty
+initial begin
+	assert(wbox_intf.sdram_cas != 3'b010 && wbox_intf.sdram_cas != 3'b011) $error("Incorrect cas latency");
+end
 
 sdram_init       : assert property (prop_sdram_correct_init)        else $error("sdram initialization Failed");
 wb_rule_3_00     : assert property (prop_wb_sigs_init_during_rst)   else $error("wishbone rule 3.00 Failed");
@@ -78,9 +78,9 @@ wb_rule_3_05     : assert property (prop_rst_at_least_one_cycle)    else $error(
 wb_rule_3_25     : assert property (prop_are_cyc_and_stb_equal)     else $error("wishbone rule 3.25 Failed");
 wb_rule_3_35     : assert property (prop_wb_std_acknowledge)        else $error("wishbone rule 3.35 Failed");
 prog_cas_rule    : assert property (prop_sdram_cas_wait)            else $error("Cas wait failed");
-prog_cas_valid   : assert property (prop_sdram_cas_valid)           else $error("Cas is invalid");
 auto_ctrl_rfsh   : assert property (prop_sdram_autorefresh_period)  else $error("automatic refresh period mismatch");
-//sdram_trcar_d, sdram_rfsh, sdram_rfmax
+
 endmodule;
 
 `endif
+
