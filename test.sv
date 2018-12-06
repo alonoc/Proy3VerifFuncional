@@ -4,21 +4,21 @@
 `include "env.sv"
 
 program test(sdrc_if intf);
+	
     environment env = new(intf);
-    
     
     initial begin
         int unsigned success = 1;
         int unsigned retVal = 1;
         env.drv.reset();
-
+		
         test_case_1(retVal);//PASS
         success &= retVal;
-
+		
         test_case_2(retVal);//PASS
         success &= retVal;
-    
-        test_case_3(retVal);
+		
+        test_case_3(retVal);//PASS
         success &= retVal;
 
         test_case_4(retVal);//PASS
@@ -29,9 +29,9 @@ program test(sdrc_if intf);
 
         test_case_6(retVal);//PASS
         success &= retVal;
-
-        //env.drv.testRandomize();
-        //env.drv.testGen();
+		
+		test_case_7(retVal);//PASS
+		success &= retVal;
         
         $display("###############################");
         if(success)
@@ -100,54 +100,6 @@ program test(sdrc_if intf);
         
         env.drv.crossover_write(writeCount);
         env.mon.readN(writeCount);
-        //env.drv.Burst_write(32'h0000_0FF0,8'h8);
-        //env.drv.Burst_write(32'h0001_0FF4,8'hF);
-        //env.drv.Burst_write(32'h0002_0FF8,8'hF);
-        //env.drv.Burst_write(32'h0003_0FFC,8'hF);
-        //env.drv.Burst_write(32'h0004_0FE0,8'hF);
-        //env.drv.Burst_write(32'h0005_0FE4,8'hF);
-        //env.drv.Burst_write(32'h0006_0FE8,8'hF);
-        //env.drv.Burst_write(32'h0007_0FEC,8'hF);
-        //env.drv.Burst_write(32'h0008_0FD0,8'hF);
-        //env.drv.Burst_write(32'h0009_0FD4,8'hF);
-        //env.drv.Burst_write(32'h000A_0FD8,8'hF);
-        //env.drv.Burst_write(32'h000B_0FDC,8'hF);
-        //env.drv.Burst_write(32'h000C_0FC0,8'hF);
-        //env.drv.Burst_write(32'h000D_0FC4,8'hF);
-        //env.drv.Burst_write(32'h000E_0FC8,8'hF);
-        //env.drv.Burst_write(32'h000F_0FCC,8'hF);
-        //env.drv.Burst_write(32'h0010_0FB0,8'hF);
-        //env.drv.Burst_write(32'h0011_0FB4,8'hF);
-        //env.drv.Burst_write(32'h0012_0FB8,8'hF);
-        //env.drv.Burst_write(32'h0013_0FBC,8'hF);
-        //env.drv.Burst_write(32'h0014_0FA0,8'hF);
-        //env.drv.Burst_write(32'h0015_0FA4,8'hF);
-        //env.drv.Burst_write(32'h0016_0FA8,8'hF);
-        //env.drv.Burst_write(32'h0017_0FAC,8'hF);
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();
-        //env.mon.read();
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();  
-        //env.mon.read();
         
         $display("###############################");
         if(env.sb.error_count == 0 && env.sb.loop_count != 0) begin
@@ -295,6 +247,34 @@ program test(sdrc_if intf);
         end
         $display("###############################");
     endtask
+	
+	task test_case_7(output int ret);
+		
+		// Before start each test reset scoreboard
+        env.sb.clear();
+		
+		$display("-------------------------------------- ");
+        $display(" Test-7: All banks test	             ");
+        $display("-------------------------------------- ");
+		
+		for(int k=0; k < 10000; k++) begin
+            env.drv.all_rand_write();
+            #100;
+            env.mon.read();
+            #100;
+        end
+		
+		$display("###############################");
+        if(env.sb.error_count == 0 && env.sb.loop_count != 0) begin
+            $display("STATUS: Test-7: All banks test	  PASSED");
+            ret = 1;
+        end
+        else begin
+            $display("ERROR:  Test-7: All banks test	  FAILED");
+            ret = 0;
+        end
+        $display("###############################");
+	endtask
     
 endprogram
 

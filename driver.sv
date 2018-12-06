@@ -106,10 +106,7 @@ class driver;
             $display("---------------------------------------------");
         end
     endtask
-
-    task Burst_write(input int unsigned a, input int unsigned b);
-    endtask
-
+	
     task single_write(input int unsigned bl = 1);
         stimulus sti = stiRandAddr;
         sti.burst_length = bl;
@@ -159,7 +156,7 @@ class driver;
         end
         writeCount = bl;
     endtask
-
+	
     task rowbank_write(input int unsigned rw, input int unsigned bnk);
         int unsigned bl;
         stimulus sti = stiRowBank;

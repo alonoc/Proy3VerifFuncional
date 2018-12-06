@@ -26,12 +26,11 @@ interface sdrc_if #(
     wire [dw-1:0] wb_dat_o;
     
     // SDRAM PORTS
-    logic sdr_cs_n;
     logic sdr_cke;
+	logic sdr_cs_n;
     logic sdr_ras_n;
     logic sdr_cas_n;
     logic sdr_we_n;
-	
     wire [1:0] sdr_ba;
     wire [12:0] sdr_addr;
     wire [SDR_BW-1:0] sdr_dqm;

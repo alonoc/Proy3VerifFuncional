@@ -12,7 +12,6 @@ class environment;
 	scoreboard sb;
 	monitor mon;
 	covergroups_sdram_ctrl cov_groups_sdr;
-    stimulusAllRand stAllRand;
 	virtual sdrc_if intf;
 	
 	function new(virtual sdrc_if intf);
@@ -21,7 +20,6 @@ class environment;
 		drv = new(intf, sb);
 		mon = new(intf, sb);
 		cov_groups_sdr = new(intf);
-        stAllRand = new();
 	endfunction
 	
 endclass
