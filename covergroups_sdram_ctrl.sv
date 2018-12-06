@@ -58,9 +58,31 @@ class covergroups_sdram_ctrl;
 			bins cmd_wr = {4'b0100};
 		}
 		
-		cmd_x_bank : cross cmd, bank;
+		addr	: coverpoint sdram_ctrl_intf.sdr_addr;
+		
+		cmd_x_bank 			: cross cmd, bank;
+		cmd_x_bank_x_addr	: cross cmd, bank, addr;
 		
 	endgroup
+	
+	covergroup sdram_commands @(posedge sdram_ctrl_intf.sdram_clk);
+	
+		commands : coverpoint {sdram_ctrl_intf.sdr_cs_n, sdram_ctrl_intf.sdr_ras_n,sdram_ctrl_intf.sdr_cas_n,sdram_ctrl_intf.sdr_we_n}
+		{
+			bins inhibit		= {4'b1xxx};
+			bins nop			= {4'b0111};
+			bins active 		= {4'b0011};
+			bins read 			= {4'b0101};
+			bins write 			= {4'b0100};
+			bins burst_ter  	= {4'b0110};
+			bins recharge		= {4'b0010};
+			bins auto_refresh 	= {4'b0001};
+			bins load_mod_reg	= {4'b0000};
+			bins misc			= default;
+		}
+		
+	endgroup
+
 	
 	function new(virtual sdrc_if sdram_ctrl_intf);
 		this.sdram_ctrl_intf = sdram_ctrl_intf;
@@ -68,6 +90,7 @@ class covergroups_sdram_ctrl;
 		// Cover points for test all banks
 		this.wb_banks = new();
 		this.sdram_banks = new();
+		this.sdram_commands = new();
 	endfunction
 	
  endclass
