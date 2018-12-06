@@ -8,12 +8,9 @@ module assertions(whitebox_intf wbox_intf);
 parameter SDRAM_RFSH    = 3'h100;
 parameter SDRAM_TRCAR_D = 4'h7;
 
-sequence are_wb_sigs_known;
-    !($isunknown({    wbox_intf.wb_stb_i  ,    wbox_intf.wb_ack_o,
-                    wbox_intf.wb_addr_i   ,    wbox_intf.wb_we_i ,
-                    wbox_intf.wb_dat_i    ,    wbox_intf.wb_sel_i,
-                    wbox_intf.wb_dat_o    ,    wbox_intf.wb_cyc_i,
-                    wbox_intf.wb_cti_i    }));
+sequence are_wb_sigs_in_default;
+	!wbox_intf.wb_stb_i and !wbox_intf.wb_ack_o and (wbox_intf.wb_addr_i == 0) and !wbox_intf.wb_we_i  and (wbox_intf.wb_dat_i == 0) and (wbox_intf.wb_sel_i == 0) and
+	!wbox_intf.wb_cyc_i and (wbox_intf.wb_cti_i == 0) and (wbox_intf.wb_dat_o == 0);
 endsequence
 
 sequence nop_cmd;
@@ -41,7 +38,7 @@ sequence no_autorefresh_cmd;
 endsequence
 
 property prop_sdram_correct_init;
-    @(posedge wbox_intf.sdram_clk) $rose(wbox_intf.sdram_en)     |=> nop_cmd [*10000] |=> nop_cmd[*0:$] ##1 precharge_cmd[*2] ##1 nop_cmd[*0:$] ##1 autorefresh_cmd[*2] ##1 nop_cmd[*0:$] ##1 autorefresh_cmd[*2];
+	@(posedge wbox_intf.sdram_clk) $rose(wbox_intf.sdram_rst) |=> nop_cmd [*10000] ##1 nop_cmd[*0:$] ##1 precharge_cmd ##1 nop_cmd[*0:$] ##1 autorefresh_cmd ##1 nop_cmd[*0:$] ##1 autorefresh_cmd;
 endproperty;
 
 property prop_sdram_autorefresh_period;
@@ -49,11 +46,15 @@ property prop_sdram_autorefresh_period;
 endproperty;
 
 property prop_wb_sigs_init_during_rst;
-    @(posedge wbox_intf.wb_clk_i) $rose(wbox_intf.wb_rst_i) |=> wbox_intf.wb_rst_i throughout are_wb_sigs_known;
+	@(posedge wbox_intf.wb_clk_i) $rose(wbox_intf.wb_rst_i) |=> wbox_intf.wb_rst_i[*1:$] |-> are_wb_sigs_in_default;
 endproperty
 
 property prop_rst_at_least_one_cycle;
-    @(posedge wbox_intf.wb_clk_i) $rose(wbox_intf.wb_rst_i) |=> wbox_intf.wb_rst_i [*1:$];
+	@(posedge wbox_intf.wb_clk_i) $rose(wbox_intf.wb_rst_i) |=> wbox_intf.wb_rst_i [*1:$];
+endproperty
+
+property prop_react_to_rst;
+	@(posedge wbox_intf.wb_clk_i) $rose(wbox_intf.wb_rst_i) |=> are_wb_sigs_in_default;
 endproperty
 
 property prop_are_cyc_and_stb_equal;
@@ -75,6 +76,7 @@ end
 sdram_init       : assert property (prop_sdram_correct_init)        else $error("sdram initialization Failed");
 wb_rule_3_00     : assert property (prop_wb_sigs_init_during_rst)   else $error("wishbone rule 3.00 Failed");
 wb_rule_3_05     : assert property (prop_rst_at_least_one_cycle)    else $error("wishbone rule 3.05 Failed");
+wb_rule_3_10	 : assert property (prop_react_to_rst)				else $error("wishbone rule 3.10 Failed");
 wb_rule_3_25     : assert property (prop_are_cyc_and_stb_equal)     else $error("wishbone rule 3.25 Failed");
 wb_rule_3_35     : assert property (prop_wb_std_acknowledge)        else $error("wishbone rule 3.35 Failed");
 prog_cas_rule    : assert property (prop_sdram_cas_wait)            else $error("Cas wait failed");
